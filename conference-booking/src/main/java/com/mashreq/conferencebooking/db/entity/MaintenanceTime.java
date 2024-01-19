@@ -29,8 +29,5 @@ public class MaintenanceTime {
 
 	@Column(name = "END_TIME")
 	private LocalTime endTime;
-
-	//prepersist
-	//preupdate
 	
 }

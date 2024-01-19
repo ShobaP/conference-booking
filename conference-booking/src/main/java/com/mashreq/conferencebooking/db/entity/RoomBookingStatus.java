@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Getter
 @Setter
@@ -18,23 +19,31 @@ public class RoomBookingStatus {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "ROOM_ID")
-    private int roomId;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "ROOM_ID", referencedColumnName = "room_id")
+    private RoomDetails roomDetails;
 
     @Column(name = "STATUS")
     @Enumerated(EnumType.STRING)
     private BookingStatus status;
 
     @Column(name = "BOOKED_START_TIME")
-    private LocalDateTime bookedStartTime;
+    private LocalTime bookedStartTime;
 
     @Column(name = "BOOKED_END_TIME")
-    private LocalDateTime bookedEndTime;
+    private LocalTime bookedEndTime;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(referencedColumnName = "room_id")
-    private RoomDetails roomDetails;
+    @Column(name = "BOOKED_DATE")
+    private LocalDate bookingDate;
+    
+    @PrePersist
+    public void createBookingDate() {
+        this.bookingDate = LocalDate.now();
+    }
 
-    //prepersist
+    @PreUpdate
+    public void updateBookingDate() {
+        this.bookingDate = LocalDate.now();
+    }
 
 }

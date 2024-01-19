@@ -2,5 +2,5 @@ package com.mashreq.conferencebooking.common.enums;
 
 public enum BookingStatus {
     BOOKED,
-    CANCELlED
+    CANCELLED
 }

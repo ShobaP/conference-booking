@@ -21,9 +21,7 @@ public class RoomDetails {
 	@Column(name = "CAPACITY")
 	private int capacity;
 
-	@OneToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.EAGER)
 	private RoomBookingStatus roomStatus;
-
-
 
 }

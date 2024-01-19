@@ -1,15 +1,7 @@
 package com.mashreq.conferencebooking.dto;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.mashreq.conferencebooking.common.enums.BookingStatus;
 
-import java.io.Serializable;
-@JsonPropertyOrder({ "roomName", "capacity"})
-@Data
-@AllArgsConstructor
-public class Room {
-    private String roomName;
-    private int capacity;
-
-}
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record Room(String roomName, Integer capacity, BookingStatus status) {}

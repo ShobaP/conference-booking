@@ -1,12 +1,31 @@
 package com.mashreq.conferencebooking.db.repository;
 
 import com.mashreq.conferencebooking.db.entity.RoomBookingStatus;
+import com.mashreq.conferencebooking.db.entity.RoomDetails;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface StatusRepository extends JpaRepository<RoomBookingStatus, Integer> {
-    Optional<RoomBookingStatus> findByRoomId(int roomId);
+    Optional<RoomBookingStatus> findByRoomDetails(RoomDetails roomId);
 
+    @Query("SELECT r from RoomBookingStatus r WHERE bookingDate = :currentDate and status = 'BOOKED'")
+    List<RoomBookingStatus> getRoomBookingtatusForCurrentDate(LocalDate currentDate);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE RoomBookingStatus set status = 'CANCELLED' where bookedStartTime = :startTime and bookedEndTime = :endTime " +
+            "and bookingDate = :currentDate and roomDetails.roomId = (SELECT roomId FROM RoomDetails where roomName = :roomName)")
+    int updateBookingStatus(@Param("currentDate") LocalDate currentDate,
+                            @Param("startTime") LocalTime startTime,
+                            @Param("endTime") LocalTime endTime,@Param("roomName") String roomName);
 
 //    @Query("SELECT * FROM RoomDetails WHERE roomId NOT IN (" +
 //            "SELECT roomId FROM RoomStatus WHERE bookedStartTime = :startTime AND " +
