@@ -7,7 +7,6 @@ import com.mashreq.conferencebooking.db.entity.RoomDetails;
 import com.mashreq.conferencebooking.db.repository.MaintenanceRepository;
 import com.mashreq.conferencebooking.db.repository.RoomRepository;
 import com.mashreq.conferencebooking.db.repository.StatusRepository;
-import com.mashreq.conferencebooking.dto.AvailabilityReq;
 import com.mashreq.conferencebooking.dto.BookingReq;
 import com.mashreq.conferencebooking.dto.BookingRes;
 import com.mashreq.conferencebooking.dto.CancelReq;
@@ -33,8 +32,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BookingServiceTest {
-
+public class BookingServiceImplTest {
     @Mock
     private RoomRepository roomRepository;
     @Mock
@@ -43,7 +41,7 @@ public class BookingServiceTest {
     private StatusRepository statusRepository;
 
     @InjectMocks
-    private BookingService bookingService;
+    private BookingServiceImpl bookingServiceImpl;
     @Test
     public void testBookRoom() {
         BookingReq bookingReq = BookingReq.BookingReqBuilder()
@@ -68,7 +66,7 @@ public class BookingServiceTest {
         maintenanceTimes.add(maintenanceTime);
 
         when(maintenanceRepository.findAll()).thenReturn(maintenanceTimes);
-        BookingRes response = bookingService.bookRoom(bookingReq);
+        BookingRes response = bookingServiceImpl.bookRoom(bookingReq);
         assertEquals(1, response.getRoom().size());
         assertEquals("26.01", response.getRoom().get(0).roomName());
     }
@@ -94,7 +92,7 @@ public class BookingServiceTest {
         maintenanceTimes.add(maintenanceTime);
 
         when(maintenanceRepository.findAll()).thenReturn(maintenanceTimes);
-        BookingRes response = bookingService.bookRoom(bookingReq);
+        BookingRes response = bookingServiceImpl.bookRoom(bookingReq);
         assertEquals(1, response.getRoom().size());
         assertEquals("26.01", response.getRoom().get(0).roomName());
     }
@@ -119,7 +117,7 @@ public class BookingServiceTest {
         maintenanceTimes.add(maintenanceTime);
 
         when(maintenanceRepository.findAll()).thenReturn(maintenanceTimes);
-        bookingService.bookRoom(bookingReq);
+        bookingServiceImpl.bookRoom(bookingReq);
     }
 
     @Test(expected = InvaildBookingDateTimeException.class)
@@ -129,14 +127,27 @@ public class BookingServiceTest {
                 .endTime(LocalTime.of((LocalTime.now().plusHours(2).getHour()), 15))
                 .capacity(2).build();
 
-        bookingService.bookRoom(bookingReq);
+        var maintenanceTimes = new ArrayList<MaintenanceTime>();
+        MaintenanceTime maintenanceTime = new MaintenanceTime();
+        maintenanceTime.setStartTime(LocalTime.of((LocalTime.now().plusHours(2).getHour()),00));
+        maintenanceTime.setEndTime(LocalTime.of((LocalTime.now().plusHours(2).getHour()),15));
+        maintenanceTimes.add(maintenanceTime);
+
+        maintenanceTime = new MaintenanceTime();
+        maintenanceTime.setStartTime(LocalTime.of(13,00));
+        maintenanceTime.setEndTime(LocalTime.of(13,15));
+        maintenanceTimes.add(maintenanceTime);
+
+        when(maintenanceRepository.findAll()).thenReturn(maintenanceTimes);
+
+        bookingServiceImpl.bookRoom(bookingReq);
     }
 
     @Test(expected = InvaildBookingDateTimeException.class)
     public void testBookRoomInMaintenanceEndTimeBetweenSlot() {
         BookingReq bookingReq = BookingReq.BookingReqBuilder()
                 .startTime(LocalTime.of((LocalTime.now().plusHours(1).getHour()), 00))
-                .endTime(LocalTime.of((LocalTime.now().plusHours(2).getHour()), 00))
+                .endTime(LocalTime.of((LocalTime.now().plusHours(1).getHour()), 26))
                 .capacity(2).build();
 
 
@@ -152,7 +163,16 @@ public class BookingServiceTest {
         maintenanceTimes.add(maintenanceTime);
 
         when(maintenanceRepository.findAll()).thenReturn(maintenanceTimes);
-        bookingService.bookRoom(bookingReq);
+        bookingServiceImpl.bookRoom(bookingReq);
+    }
+
+    @Test(expected = RoomNotAvailableException.class)
+    public void testBookRoomNoAvaialbleRooms() {
+        BookingReq bookingReq = BookingReq.BookingReqBuilder()
+                .startTime(LocalTime.of((LocalTime.now().plusHours(1).plusMinutes(30).getHour()), 00))
+                .endTime(LocalTime.of((LocalTime.now().plusHours(2).getHour()), 15))
+                .capacity(2).build();
+        bookingServiceImpl.bookRoom(bookingReq);
     }
 
     @Test(expected = InvaildBookingDateTimeException.class)
@@ -162,7 +182,7 @@ public class BookingServiceTest {
                 .endTime(LocalTime.of((LocalTime.now().plusHours(2).getHour()), 00))
                 .capacity(2).build();
 
-        bookingService.bookRoom(bookingReq);
+        bookingServiceImpl.bookRoom(bookingReq);
     }
 
     @Test(expected = InvaildBookingDateTimeException.class)
@@ -172,12 +192,11 @@ public class BookingServiceTest {
                 .endTime(LocalTime.of(00, 15))
                 .capacity(2).build();
 
-        bookingService.bookRoom(bookingReq);
+        bookingServiceImpl.bookRoom(bookingReq);
     }
 
     @Test
     public void testGetAvailableRooms() {
-        AvailabilityReq availabilityReq = new AvailabilityReq(LocalTime.of(23,00),LocalTime.of(00, 00));
         var roomBookingStatus = new RoomBookingStatus();
         roomBookingStatus.setBookedStartTime(LocalTime.of(23, 00));
         roomBookingStatus.setBookedEndTime(LocalTime.of(23, 15));
@@ -196,13 +215,12 @@ public class BookingServiceTest {
         roomDetailsList.add(roomDetails);
         when(roomRepository.findByRoomIdNotIn(any())).thenReturn(Arrays.asList(new RoomDetails()));
 
-        var response = bookingService.getAvailableRooms(availabilityReq);
+        var response = bookingServiceImpl.getAvailableRooms(LocalTime.of(23,00), LocalTime.of(00, 00));
         assertEquals(1, response.getRoom().size());
     }
 
     @Test
     public void testGetAvailableRoomsWithoutOverlap() {
-        AvailabilityReq availabilityReq = new AvailabilityReq(LocalTime.of(23,00),LocalTime.of(23, 15));
         var roomBookingStatus = new RoomBookingStatus();
         roomBookingStatus.setBookedStartTime(LocalTime.of(LocalTime.now().getHour(), 00));
         roomBookingStatus.setBookedEndTime(LocalTime.of(LocalTime.now().plusMinutes(30).getHour(), 00));
@@ -220,13 +238,12 @@ public class BookingServiceTest {
         roomDetails.setRoomName("26.02");
         roomDetailsList.add(roomDetails);
         when(roomRepository.findAll()).thenReturn(roomDetailsList);
-        var response = bookingService.getAvailableRooms(availabilityReq);
+        var response = bookingServiceImpl.getAvailableRooms(LocalTime.of(23,00),LocalTime.of(23, 15));
         assertEquals(2, response.getRoom().size());
     }
 
     @Test
     public void testGetAvailableRoomsWithNoSlots() {
-        AvailabilityReq availabilityReq = new AvailabilityReq(LocalTime.of(23,00),LocalTime.of(23, 30));
         List<RoomBookingStatus> roomBookingStatusList = new ArrayList<>();
         var roomBookingStatus = new RoomBookingStatus();
         roomBookingStatus.setBookedStartTime(LocalTime.of(23, 00));
@@ -253,7 +270,7 @@ public class BookingServiceTest {
         roomDetails.setRoomId(2);
         roomDetails.setRoomName("26.02");
         roomDetailsList.add(roomDetails);
-        var response = bookingService.getAvailableRooms(availabilityReq);
+        var response = bookingServiceImpl.getAvailableRooms(LocalTime.of(23,00),LocalTime.of(23, 30));
         assertEquals(0, response.getRoom().size());
     }
 
@@ -261,7 +278,7 @@ public class BookingServiceTest {
     public void testCancelBooking() {
         when(statusRepository.updateBookingStatus(any(), any(), any(), any())).thenReturn(1);
         var request = new CancelReq("26.01", LocalTime.now(), LocalTime.now());
-        BookingRes response = bookingService.cancelBooking(request);
+        BookingRes response = bookingServiceImpl.cancelBooking(request);
         assertEquals(1, response.getRoom().size());
         assertEquals("26.01", response.getRoom().get(0).roomName());
         assertEquals(BookingStatus.CANCELLED, response.getRoom().get(0).status());
@@ -271,7 +288,7 @@ public class BookingServiceTest {
     public void testCancelBookingException() {
         when(statusRepository.updateBookingStatus(any(), any(), any(), any())).thenReturn(0);
         var request = new CancelReq("26.01", LocalTime.now(), LocalTime.now());
-        BookingRes response = bookingService.cancelBooking(request);
+        BookingRes response = bookingServiceImpl.cancelBooking(request);
 
    }
 

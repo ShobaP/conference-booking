@@ -1,13 +1,11 @@
 package com.mashreq.conferencebooking.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.mashreq.conferencebooking.dto.Room;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -15,10 +13,12 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BookingRes implements Serializable {
 
-    //serialVersionId
+    //serialVerssionId
     private List<Room> room;
     private LocalDate bookingDate;
+    @Schema(type = "String", pattern = "HH:mm:SS")
     private LocalTime startTime;
+    @Schema(type = "String", pattern = "HH:mm:SS")
     private LocalTime endTime;
 
 }

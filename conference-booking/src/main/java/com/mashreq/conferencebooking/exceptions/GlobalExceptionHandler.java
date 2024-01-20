@@ -47,14 +47,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
     @ExceptionHandler({InvaildBookingDateTimeException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Object> handleException(InvaildBookingDateTimeException ex) {
-        String error = "Invalid Request";
+        String error = "Invalid Booking Time";
         return buildResponseEntity(new Response(HttpStatus.BAD_REQUEST, error, ex.getLocalizedMessage()));
     }
 
     @ExceptionHandler({ RoomNotAvailableException.class, RecordNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<Object> handleException(Exception ex) {
-        String error = "Record not found";
+        String error = "Data Not Found";
         return buildResponseEntity(new Response(HttpStatus.NOT_FOUND, error, ex.getLocalizedMessage()));
     }
 
