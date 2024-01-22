@@ -21,7 +21,7 @@ Project Setup
 1. Download the maven project <b><I>conference-booking</I></B> from above github link
 2. Import as Maven Project in IDE (IntelliJ/Eclipse/STS)
 3. mvn clean install
-4. Run BookingApplication.java
+4. Run src/main/java/com.mashreq.conferencebooking/BookingApplication.java
 5. App is started successfully
 
 Testing
@@ -40,5 +40,7 @@ Option 2:
 Swagger
 --------------------
 http://localhost:8080/swagger-ui/index.html
+
+![img.png](conference-booking/src/main/resources/img.png)
 
 
