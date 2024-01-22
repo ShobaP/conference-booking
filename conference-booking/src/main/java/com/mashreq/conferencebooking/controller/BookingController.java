@@ -62,8 +62,8 @@ public class BookingController {
                             schema = @Schema(implementation = Response.class))})
     })
     @GetMapping("/available/list")
-    public BookingRes getAvailableRooms(@Schema(type = "LocalTime") @RequestParam(value="start", required = false) LocalTime startTime,
-                                        @Schema(type = "LocalTime") @RequestParam(value="end", required = false) LocalTime endTime) {
+    public BookingRes getAvailableRooms(@Schema(type = "string") @DateTimeFormat(pattern="HH:mm") @RequestParam(value="start") LocalTime startTime,
+                                        @Schema(type = "string") @DateTimeFormat(pattern="HH:mm") @RequestParam(value="end") LocalTime endTime) {
         log.info("getAvailableRooms start");
         return bookingService.getAvailableRooms(startTime, endTime);
     }

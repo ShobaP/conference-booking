@@ -11,10 +11,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @ControllerAdvice
@@ -65,6 +67,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
         return buildResponseEntity(new Response(HttpStatus.INTERNAL_SERVER_ERROR, error, ex.getLocalizedMessage()));
     }
 
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
+                                                                          HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String error = "Parameter is missing";
+        return buildResponseEntity(new Response(HttpStatus.BAD_REQUEST, error, ex.getLocalizedMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Object> handleConverterErrors(MethodArgumentTypeMismatchException ex) {
+        String error = "Type Mismatch";
+        return buildResponseEntity(new Response(HttpStatus.BAD_REQUEST, error, ex.getLocalizedMessage()));
+    }
 
 
 }
