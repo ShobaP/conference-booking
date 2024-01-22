@@ -1,17 +1,12 @@
 package com.mashreq.conferencebooking;
 
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
-import org.springframework.context.annotation.Bean;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.format.DateTimeFormatter;
-
 @RestController
+@EnableCaching
 @SpringBootApplication
 public class BookingApplication
 {
@@ -19,6 +14,4 @@ public class BookingApplication
     {
         SpringApplication.run(BookingApplication.class,args);
     }
-
-
 }

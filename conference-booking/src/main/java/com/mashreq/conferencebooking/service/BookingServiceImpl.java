@@ -138,7 +138,7 @@ public class BookingServiceImpl implements BookingService {
         log.info("----saveBookingStatus end-----");
     }
 
-    @Cacheable("maintenance")
+    @Cacheable(cacheNames = "maintenance")
     private List<MaintenanceTime> getMaintenanceSlots() {
         return maintenanceRepository.findAll();
     }
